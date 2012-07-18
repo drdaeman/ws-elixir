@@ -1,21 +1,22 @@
-# Feel free to use, reuse and abuse the code in this file.
-
-all: app elixir
-
-app: get-deps
-	@./rebar compile
+all: compile
 
 get-deps:
 	@./rebar get-deps
 
+compile: get-deps
+	@ERL_LIBS=`pwd`/deps/elixir/lib ./rebar compile
+
 clean:
-	rm -rf __MAIN__
-	rm -rf ebin
+	@./rebar clean
 
 dist-clean: clean
 	@./rebar clean
-	rm -f erl_crash.dump
+	@./rebar delete-deps
+	@rmdir deps 2>/dev/null || true
+	@rm -f erl_crash.dump
 
-elixir: src/*
-	rm -rf __MAIN__
-	elixirc -pa 'deps/*/ebin' src/*.ex
+start:
+	@ERL_LIBS=deps `pwd`/deps/elixir/bin/elixir --no-halt -pa ebin -e "WebSocketServer.start"
+
+iex:
+	@ERL_LIBS=deps `pwd`/deps/elixir/bin/iex -pa ebin
